@@ -1,15 +1,50 @@
 let tasks = [];
-const taskList = document.getElementById('list');
+const tasksList = document.getElementById('list');
 const addTaskInput = document.getElementById('add');
 const tasksCounter = document.getElementById('tasks-counter');
 
-function renderList(){}
+function addTaskToDOM (task) {
+    const li = document.createElement('li');
 
-function markTaskAsComplete(){}
+    li.innerHTML = `
+        <input type="checkbox" id="${task.id}" ${task.done} ? 'checked' : ''} class="custom-checkbox">
+        <label for="${task.id}" > ${task.text}</label>
+        <img src="images/red-trash.png" class="delete" data-id="${task.id}" />
+    `;
+
+    tasksList.append(li);
+}
+
+function renderList(){
+    tasksList.innerHTML = '';
+
+    for (let i = 0; i < tasks.length;  i++) {
+        addTaskToDOM(tasks[i]);
+    }
+
+    tasksCounter.innerHTML = tasks.length;
+}
+
+function toggleTask(taskId){
+    const task = tasks.filter(function (task) {
+        return task.id == taskId;
+    });
+
+    if(task.length > 0) {
+        const currentTask = task[0];
+
+        currentTask.done = !currentTask.done;
+    renderList();
+    showNotification('Task toggled succesfully');
+    return;
+    }
+
+    showNotification('could not toggle the task');
+}
 
 function deleteTask(taskId){
     const newTasks = tasks.filter(function(task){
-        return task.id !== "1695319326553";
+        return task.id !== taskId;
     })
 
     tasks = newTasks;
@@ -52,4 +87,24 @@ function handleInputKeypress(e){
     }
 }
 
-addTaskInput.addEventListener('keyup', handleInputKeypress);
+function handleClickListener(e) {
+    const target = e.target;
+    // console.log(target)
+
+    if(target.className == 'delete') {
+        const taskId = target.id;
+        deleteTask(taskId);
+        return;
+    }else if (target.className == 'custom-checkbox') {
+        const taskId = target.id;
+        toggleTask(taskId);
+        return;
+    }
+}
+
+function initializeApp () {
+    addTaskInput.addEventListener('keyup', handleInputKeypress);
+    document.addEventListener('click', handleClickListener);
+}
+
+initializeApp();
